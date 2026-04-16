@@ -1,4 +1,6 @@
-const BASE = import.meta.env.VITE_API_URL || 'https://ai-powered-worker-productivity-dashboard-yhar.onrender.com/api';
+const BASE = import.meta.env.DEV
+  ? '/api'
+  : 'https://ai-powered-worker-productivity-dashboard-yhar.onrender.com/api';
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {
