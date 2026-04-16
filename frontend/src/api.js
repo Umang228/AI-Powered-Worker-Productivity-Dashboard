@@ -1,4 +1,4 @@
-const BASE = 'https://ai-powered-worker-productivity-dashboard-yhar.onrender.com/api';
+const BASE = '/api';
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {

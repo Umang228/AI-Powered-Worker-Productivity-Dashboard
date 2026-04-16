@@ -5,12 +5,13 @@ import WorkerTable from './components/WorkerTable';
 import WorkstationTable from './components/WorkstationTable';
 import WorkerDetail from './components/WorkerDetail';
 import WorkstationDetail from './components/WorkstationDetail';
+import Insights from './components/Insights';
 import Header from './components/Header';
 import {
   Factory,
   Users,
   Monitor,
-  RefreshCw,
+  Lightbulb,
   ChevronLeft,
 } from 'lucide-react';
 
@@ -22,6 +23,7 @@ export default function App() {
   const [selectedWorker, setSelectedWorker] = useState(null);
   const [selectedStation, setSelectedStation] = useState(null);
   const [seeding, setSeeding] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -29,6 +31,7 @@ export default function App() {
       setError(null);
       const data = await api.getDashboard();
       setDashboard(data);
+      setLastUpdated(new Date());
     } catch (err) {
       setError(err.message);
     } finally {
@@ -57,7 +60,7 @@ export default function App() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-500 text-sm font-medium">Loading dashboard…</p>
+          <p className="text-slate-500 text-sm font-medium">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -87,13 +90,14 @@ export default function App() {
     { id: 'factory', label: 'Factory', icon: Factory },
     { id: 'workers', label: 'Workers', icon: Users },
     { id: 'workstations', label: 'Workstations', icon: Monitor },
+    { id: 'insights', label: 'Insights', icon: Lightbulb },
   ];
 
   const showDetail = selectedWorker || selectedStation;
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header onRefresh={fetchData} onReseed={handleReseed} seeding={seeding} />
+      <Header onRefresh={fetchData} onReseed={handleReseed} seeding={seeding} lastUpdated={lastUpdated} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         {showDetail ? (
@@ -118,7 +122,6 @@ export default function App() {
           </div>
         ) : (
           <>
-            {/* Tab Navigation */}
             <div className="flex gap-1 bg-white rounded-xl p-1 shadow-sm border border-slate-200 mb-8 w-fit">
               {tabs.map(({ id, label, icon: Icon }) => (
                 <button
@@ -136,7 +139,7 @@ export default function App() {
               ))}
             </div>
 
-            {activeTab === 'factory' && <FactorySummary factory={dashboard.factory} />}
+            {activeTab === 'factory' && <FactorySummary factory={dashboard.factory} workers={dashboard.workers} />}
             {activeTab === 'workers' && (
               <WorkerTable workers={dashboard.workers} onSelect={setSelectedWorker} />
             )}
@@ -145,6 +148,9 @@ export default function App() {
                 stations={dashboard.workstations}
                 onSelect={setSelectedStation}
               />
+            )}
+            {activeTab === 'insights' && (
+              <Insights factory={dashboard.factory} workers={dashboard.workers} workstations={dashboard.workstations} />
             )}
           </>
         )}
